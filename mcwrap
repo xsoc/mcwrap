@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#Simple macchanger wrapper
+
+#Dependencies:
+# - gawk
+# - ip
+# - macchanger
+#Probably (?) requires root
+
+#Create array of interfaces
+ifaces=( $(ip addr list | awk -F': ' '/^[0-9]/ && $2 != "lo" {print $2}') )
+
+#Display indexed list of interfaces
+for ((i=0; i<${#ifaces[@]}; i++))
+do
+    echo $i - ${ifaces[$i]}
+done
+
+#Prompt user for selection
+read -p "Select interface (eg. 0): "  i
+selected_iface=${ifaces[$i]}
+echo Interface selected: $selected_iface
+
+#Do the things
+ip link set $selected_iface down
+macchanger -b -r $selected_iface
+ip link set $selected_iface up
